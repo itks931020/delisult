@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <meta name="format-detection" content="telephone=no">
-<title>デリザルト | Delivery Result Tracker</title>
+<title>デリザルト | Delivery Result Tracker v13.8.0</title>
 <style>
 :root{
   --forest-bg: none;
@@ -242,12 +242,21 @@ button:active{transform:translateY(1px)}
 .centerToast{
   position:fixed; inset:0;
   display:none; align-items:center; justify-content:center;
-  z-index:10000; pointer-events:none;
+  z-index:20000; pointer-events:none;
+  padding:12px;
 }
 .centerToast.show{ display:flex; }
+/* bottom placement (for longer info) */
+.centerToast.pos-bottom{
+  align-items:flex-end;
+  justify-content:center;
+  padding:12px;
+}
 .centerToastBox{
   pointer-events:none;
   padding:14px 18px;
+  max-width:min(520px, calc(100% - 24px));
+  text-align:center;
   border-radius:14px;
   background:rgba(6,15,12,.92);
   border:1px solid rgba(34,197,94,.55);
@@ -280,6 +289,54 @@ button:active{transform:translateY(1px)}
 .modalToast .msg{font-size:13px;color:rgba(226,232,240,.92);line-height:1.45;margin-bottom:10px}
 .modalToast .actions{display:flex;gap:8px}
 .modalToast .actions button{flex:1}
+
+/* Forest background inside popups (keeps unified vibe) */
+.modalToast{position:relative;overflow:hidden}
+.modalToast::before{
+  content:"";
+  position:absolute;inset:0;
+  background-image:var(--forest-bg);
+  background-size:cover;background-position:center;
+  filter:blur(8px);
+  opacity:.28;
+  transform:scale(1.08);
+}
+.modalToast>*{position:relative;z-index:1}
+
+.dcCard{position:relative;overflow:hidden}
+.dcCard::before{
+  content:"";
+  position:absolute;inset:0;
+  background-image:var(--forest-bg);
+  background-size:cover;background-position:center;
+  filter:blur(10px);
+  opacity:.22;
+  transform:scale(1.08);
+}
+.dcCard>*{position:relative;z-index:1}
+
+.qmWrap{position:relative;overflow:hidden}
+.qmWrap::before{
+  content:"";
+  position:absolute;inset:0;
+  background-image:var(--forest-bg);
+  background-size:cover;background-position:center;
+  filter:blur(10px);
+  opacity:.22;
+  transform:scale(1.08);
+}
+.qmWrap>*{position:relative;z-index:1}
+
+/* Manual online-time input (unified) */
+.timeInputNote{
+  font-size:12px;
+  color:rgba(226,232,240,.9);
+  line-height:1.45;
+  margin-bottom:12px;
+}
+.timeInputRow{display:flex;gap:10px;align-items:flex-end;margin-bottom:8px}
+.timeInputCol{flex:1;min-width:0}
+.timeInputPreview{margin-top:4px}
 
 /* calendar */
 .calBtn{
@@ -902,7 +959,6 @@ body::after {
 <input enterkeyhint="done" id="chgPaid" inputmode="numeric" pattern="[0-9]*" placeholder="例: 10000" type="text">
 </div>
 </div>
-<div class="sub" style="margin-top:8px;">入力すると自動計算（候補：切り上げ / 5000 / 10000）</div>
 <div class="chgBox" id="chgSuggest" style="margin-top:8px;"><div class="sub">商品代金を入れると候補が出る</div></div>
 <div class="chgBox chgResult" id="chgResult" style="margin-top:8px; display:none;"></div>
 </div>
@@ -998,7 +1054,6 @@ body::after {
   <div class="centerToastBox" id="centerToastBox">追加しました</div>
 </div>
 
-<div class="toast" id="toast"></div>
 <!-- modal -->
 <div aria-hidden="true" class="modalOverlay" id="modalOverlay">
 <div class="modalToast">
@@ -1009,7 +1064,7 @@ body::after {
 </div>
 <div class="footerBar">
 <div class="footerInner">
-<div class="footerVer" id="footerVer">v13.7</div>
+<div class="footerVer" id="footerVer">v13.8.0</div>
 <button class="btn-muted" id="btnReload" type="button">更新</button>
 </div>
 </div>
@@ -1047,7 +1102,7 @@ body::after {
 (() => {
   "use strict";
 
-  const APP_VERSION = "v13.7";
+  const APP_VERSION = "v13.8.0";
   const STORE_KEY = "ddt_store_v12";
 
   const setOnlineWageTier = (wage) => {
@@ -1176,32 +1231,38 @@ const platformLabel=(p)=>{
     lastSaveAt = now;
   }
 
-  // toasts
-  let toastTimer=null;
-  function showToast(msg){
-    const t=safeEl("toast"); if(!t) return;
-    t.textContent=msg; t.classList.add("show");
-    clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),5000);
-  }
+  // unified notify (center/bottom) — single renderer for all small popups
+let notifyTimer = null;
+function showNotify(msg, { ms=1600, pos="center" } = {}){
+  const ov = safeEl("centerToast");
+  const box = safeEl("centerToastBox");
+  if(!ov || !box) return;
 
-  // center toast (auto hide, for "追加完了" etc.)
-  let centerToastTimer=null;
-  function showCenterToast(msg, ms=1600){
-    const ov=safeEl("centerToast");
-    const box=safeEl("centerToastBox");
-    if(!ov||!box) return;
-    box.textContent = msg || "";
-    ov.classList.add("show");
-    ov.setAttribute("aria-hidden","false");
-    clearTimeout(centerToastTimer);
-    centerToastTimer=setTimeout(()=>{
-      ov.classList.remove("show");
-      ov.setAttribute("aria-hidden","true");
-    }, ms);
-  }
+  // placement
+  ov.classList.toggle("pos-bottom", pos === "bottom");
 
+  box.textContent = msg || "";
+  ov.classList.add("show");
+  ov.setAttribute("aria-hidden","false");
 
-  // delivery complete popup (center, auto hide)
+  clearTimeout(notifyTimer);
+  notifyTimer = setTimeout(()=>{
+    ov.classList.remove("show");
+    ov.setAttribute("aria-hidden","true");
+  }, ms);
+}
+
+// toast (bottom, longer)
+function showToast(msg){
+  showNotify(msg, { ms: 5000, pos: "bottom" });
+}
+
+// center toast (auto hide, for "追加完了" etc.)
+function showCenterToast(msg, ms=1600){
+  showNotify(msg, { ms, pos: "center" });
+}
+
+// delivery complete popup (center, auto hide)
   let centerPopTimer = null;
   function showDeliveryCompletePopup(nowRun){
     const ov=safeEl("dcOverlay"); if(!ov) return;
@@ -1746,21 +1807,21 @@ function addQuest(){
 
     ttl.textContent = `オンライン時間（${fmtDayKey(key)}）`; 
     mm.innerHTML = `
-      <div class="subtitle" style="margin:6px 0 10px; text-align:left;">
+      <div class="timeInputNote">
         合計のオンライン時間を入力して反映します。<br>
         ※オンライン中の場合は、反映後に「今から再計測」します。
       </div>
-      <div class="row" style="gap:10px; align-items:flex-end;">
-        <div style="flex:1;">
+      <div class="timeInputRow">
+        <div class="timeInputCol">
           <div class="miniLabel">時間</div>
-          <select id="tmpOnlineH" class="input" style="width:100%"></select>
+          <select id="tmpOnlineH" class="input"></select>
         </div>
-        <div style="flex:1;">
+        <div class="timeInputCol">
           <div class="miniLabel">分</div>
-          <select id="tmpOnlineM" class="input" style="width:100%"></select>
+          <select id="tmpOnlineM" class="input"></select>
         </div>
       </div>
-      <div class="subtitle" id="tmpOnlinePreview" style="margin-top:10px; text-align:left;"></div>
+      <div class="timeInputPreview subtitle" id="tmpOnlinePreview"></div>
     `;
 
     // build options
