@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <meta name="format-detection" content="telephone=no">
-<title>デリザルト | Delivery Result Tracker v13.8.6</title>
+  <title>デリザルト | Delivery Result Tracker v13.8.11</title>
 <style>
 :root{
   --forest-bg: none;
@@ -715,7 +715,7 @@ body::after {
    Target: delivery complete popup only (#dcOverlay)
    ========================================================= */
 :root{
-  --dc-forest-bg: url("./assets/img/dc_forest_reward_bg.PNG");
+  --dc-forest-bg: url('assets/img/reward_bg_00000_10000.webp');
 }
 
 #dcOverlay{
@@ -1174,7 +1174,7 @@ body::after {
 </div>
 <div class="footerBar">
 <div class="footerInner">
-<div class="footerVer" id="footerVer">v13.8.6</div>
+  <div class="footerVer" id="footerVer">v13.8.11</div>
 <button class="btn-muted" id="btnReload" type="button">更新</button>
 </div>
 </div>
@@ -1212,7 +1212,25 @@ body::after {
 (() => {
   "use strict";
 
-  const APP_VERSION = "v13.8.6";
+  const APP_VERSION = "v13.8.11";
+
+  // 配達完了ポップアップ背景（総売上に応じて差し替え）
+  // ※GitHubにアップする画像パスはここだけ変えればOK
+  const DC_BG_BY_TOTAL_SALES = [
+    { max: 10000, url: "assets/img/reward_bg_00000_10000.webp" },
+    { max: 20000, url: "assets/img/reward_bg_10001_20000.webp" },
+    { max: 30000, url: "assets/img/reward_bg_20001_30000.webp" },
+    { max: Infinity, url: "assets/img/reward_bg_30001_plus.webp" },
+  ];
+
+  function pickDcBgUrlByTotalSales(totalSalesYen){
+    const n = Number(totalSalesYen);
+    const v = Number.isFinite(n) ? n : 0;
+    for(const row of DC_BG_BY_TOTAL_SALES){
+      if(v <= row.max) return row.url;
+    }
+    return DC_BG_BY_TOTAL_SALES[0].url;
+  }
   const STORE_KEY = "ddt_store_v12";
 
   const setOnlineWageTier = (wage) => {
@@ -1383,6 +1401,14 @@ function showCenterToast(msg, ms=1600){
     // totals
     const onlineH = currentOnlineMs()/3600000;
     const onlineW = onlineH>0 ? Math.floor(t.sales/onlineH) : 0;
+
+    // 総売上に応じて背景を差し替え（CSS: var(--dc-forest-bg)）
+    try{
+      const bgUrl = pickDcBgUrlByTotalSales(t.sales);
+      document.documentElement.style.setProperty("--dc-forest-bg", `url('${bgUrl}')`);
+    }catch(e){
+      // no-op
+    }
 
     if(safeEl("dcSales")) safeEl("dcSales").textContent = `¥${fmtYen(t.sales)}`;
     if(safeEl("dcRuns")) safeEl("dcRuns").textContent = `${fmtYen(t.count)}回`;
