@@ -1,8 +1,8 @@
 <html lang="ja" style="--forest-bg: url(&quot;https://itks931020.github.io/delivery-drill/assets/img/9558B4CF-A0AB-4B36-B537-05A4DAF9AAAA.png&quot;);"><head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1" name="viewport">
-<meta name="format-detection" content="telephone=no">
-  <title>デリザルト | Delivery Result Tracker v13.8.11</title>
+<meta content="telephone=no" name="format-detection">
+<title>デリザルト | Delivery Result Tracker v14.0_0</title>
 <style>
 :root{
   --forest-bg: none;
@@ -134,6 +134,29 @@ button:active{transform:translateY(1px)}
 }
 .top-row .label{font-size:12px;color:#e5e7eb}
 .top-row .value{font-size:26px;font-weight:900;margin-top:2px;text-shadow:0 10px 22px rgba(0,0,0,.5)}
+
+/* === Total Sales Tier (main screen) === */
+#totalSalesCard{position:relative; overflow:hidden;}
+
+/* Tier1: “森に溶ける”静かな金縁（※二重枠を避ける） */
+#totalSalesCard.tier1{
+  /* 9-sliceフレーム画像が主役。カード側の“内側線”は一切作らない */
+  border:none !important;
+  outline:none !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.32) !important; /* 外側の深みだけ残す */
+  background-clip: padding-box !important;
+}
+
+/* 旧CSSの内側フレーム(::before)は無効化（薄い線の原因） */
+#totalSalesCard.tier1::before{
+  content:none !important;
+}
+
+
+/* テキストはそのまま、ほんの少し締める */
+#totalSalesCard.tier1 .label{letter-spacing:.02em;}
+#totalSalesCard.tier1 .value{ text-shadow:0 2px 14px rgba(0,0,0,.55); }
+
 .top-row-wage .label{font-size:12px;color:#e5e7eb}
 .top-row-wage .value{font-size:26px;font-weight:900;margin-top:2px;text-shadow:0 10px 22px rgba(0,0,0,.5)}
 /* Online wage tier styles (lightweight, no images) */
@@ -817,6 +840,120 @@ body::after {
   to{ transform: translateY(0); opacity: 1; }
 }
 
+
+
+/* === v13.8.15: Total Sales Tier1 Frame Overlay (image) === */
+#totalSalesCard{
+  position: relative;
+  overflow: hidden;
+  border: none !important;           /* remove double border */
+  background: rgba(10, 14, 12, 0.25) !important; /* keep subtle glass */
+}
+#totalSalesCard::before{
+  content:"";
+  position:absolute;
+  inset:6px 10px;
+  background-image:url('assets/img/total_sales_frame_tier1_v2.webp');
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:100% 100%;
+  pointer-events:none;
+  z-index:0;
+}
+#totalSalesCard > *{
+  position: relative;
+  z-index: 2;
+}
+
+/* === VERSION TAG (top-right) === */
+.versionTag{
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 9999;
+  font-size: 12px;
+  letter-spacing: .02em;
+  color: rgba(255,255,255,.72);
+  background: rgba(0,0,0,.25);
+  border: 1px solid rgba(255,255,255,.16);
+  padding: 6px 10px;
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  user-select: none;
+  pointer-events: none;
+}
+
+/* === TOTAL SALES FRAME (9-slice overlay, Tier1) === */
+#totalSalesCard{
+  position: relative;
+  overflow: visible !important;
+}
+/* kill the default border on total sales card only (prevents double frame) */
+#totalSalesCard{
+  border-color: rgba(255,255,255,.18) !important;
+}
+#totalSalesCard.tier1{
+  border-color: rgba(255,255,255,.00) !important;
+}
+
+#totalSalesCard .tsFrame{
+  position: absolute;
+  inset: -10px -14px;
+  z-index: 2;
+  pointer-events: none;
+}
+#totalSalesCard .tsFrame > i{
+  position: absolute;
+  display: block;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,.35));
+  opacity: .95;
+}
+
+/* sizing knobs */
+#totalSalesCard{
+  --ts-corner: 52px;
+  --ts-edge: 26px;
+}
+
+/* corners */
+#totalSalesCard .ts-tl{left:0;top:0;width:var(--ts-corner);height:var(--ts-corner);background-image:url('assets/img/total_sales_frame_tier1_tl.webp');}
+#totalSalesCard .ts-tr{right:0;top:0;width:var(--ts-corner);height:var(--ts-corner);background-image:url('assets/img/total_sales_frame_tier1_tr.webp');}
+#totalSalesCard .ts-bl{left:0;bottom:0;width:var(--ts-corner);height:var(--ts-corner);background-image:url('assets/img/total_sales_frame_tier1_bl.webp');}
+#totalSalesCard .ts-br{right:0;bottom:0;width:var(--ts-corner);height:var(--ts-corner);background-image:url('assets/img/total_sales_frame_tier1_br.webp');}
+
+/* edges */
+#totalSalesCard .ts-top{left:var(--ts-corner);right:var(--ts-corner);top:0;height:var(--ts-edge);background-image:url('assets/img/total_sales_frame_tier1_top.webp');background-repeat:repeat-x;background-size:auto 100%;}
+#totalSalesCard .ts-bottom{left:var(--ts-corner);right:var(--ts-corner);bottom:0;height:var(--ts-edge);background-image:url('assets/img/total_sales_frame_tier1_bottom.webp');background-repeat:repeat-x;background-size:auto 100%;}
+#totalSalesCard .ts-left{top:var(--ts-corner);bottom:var(--ts-corner);left:0;width:var(--ts-edge);background-image:url('assets/img/total_sales_frame_tier1_left.webp');background-repeat:repeat-y;background-size:100% auto;}
+#totalSalesCard .ts-right{top:var(--ts-corner);bottom:var(--ts-corner);right:0;width:var(--ts-edge);background-image:url('assets/img/total_sales_frame_tier1_right.webp');background-repeat:repeat-y;background-size:100% auto;}
+
+/* ensure text above frame */
+#totalSalesCard .label, #totalSalesCard .value{
+  position: relative;
+  z-index: 3;
+}
+
+
+/* v14.0_0 fix: 総売上カード内側の薄い線（元の枠/影）を完全に消す */
+#totalSalesCard,
+#totalSalesCard.summary,
+#totalSalesCard.job-card {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-clip: padding-box !important;
+}
+/* 共通の疑似要素で線を作っているケースも潰す */
+#totalSalesCard::before,
+#totalSalesCard::after {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
 </style>
 <meta content="noindex,nofollow" name="robots">
 <script>
@@ -847,17 +984,33 @@ body::after {
       }
     }
     // if all fail, keep the fallback gradient-only background.
-  })();
+  
+  // keep tier in sync even if totals update from inputs/storage
+  let __lastTierSales = null;
+  setInterval(() => {
+    const v = getTotalSalesValue();
+    if (v !== __lastTierSales){
+      __lastTierSales = v;
+      applyTotalSalesTier();
+    }
+  }, 400);
+
+})();
 })();
 </script>
-
 </head>
 <body>
-  <div id="bg"></div>
-  <div id="scroll">
+  <div class="versionTag" id="versionTag">v14.0_0</div>
+<div id="bg"></div>
+<div id="scroll">
 <div class="appTitle"><div class="jp">デリザルト</div><div class="en">Delivery Result Tracker</div></div>
 <div class="card sparkle" id="mainStatsCard">
-<div class="top-row">
+<div class="top-row tier1" id="totalSalesCard">
+  <div class="tsFrame" aria-hidden="true">
+    <i class="ts-tl"></i><i class="ts-top"></i><i class="ts-tr"></i>
+    <i class="ts-left"></i><i class="ts-right"></i>
+    <i class="ts-bl"></i><i class="ts-bottom"></i><i class="ts-br"></i>
+  </div>
 <div class="label">総売上（クエスト込み）</div>
 <div class="value">¥<span id="totalSales">0</span></div>
 </div>
@@ -1038,7 +1191,7 @@ body::after {
 <button class="btn-muted" id="btnToggleRunList">配達済み案件</button>
 <button id="btnAddRun">追加</button>
 </div>
-<div class="runlist" id="runList"></div>
+<div class="runlist" id="runList" style="display: block;"><div class="sub" style="margin:6px 0 0;">まだなし</div></div>
 </div>
 <div class="card sparkle" id="topSummaryCard">
 <div class="row">
@@ -1056,7 +1209,6 @@ body::after {
 <button class="btn-goal" id="btnGoalSet">目標設定</button>
 </div>
 </div>
-
 <div class="card" id="changeCalcCard">
 <div class="center-title" style="font-size:16px;">お釣り計算</div>
 <div class="row" style="margin-top:6px; gap:8px;">
@@ -1072,30 +1224,29 @@ body::after {
 <div class="chgBox" id="chgSuggest" style="margin-top:8px;"><div class="sub">商品代金を入れると候補が出る</div></div>
 <div class="chgBox chgResult" id="chgResult" style="margin-top:8px; display:none;"></div>
 </div>
-
 <div class="card" id="quickMemoCard">
 <div class="center-title" style="font-size:16px;">メモ（端末内のみ）</div>
 <div class="subtitle" style="text-align:center; margin-top:2px;">※共有・送信なし / ショートカット検索連携OK</div>
-<div class="row" style="margin-top:8px;">
-<div style="flex:1;">
-<div class="label">検索（部分一致）</div>
-<input id="qmSearch" placeholder="ユーザー名 / 建物名 / 何でも" type="text">
+
+<div class="sub" id="qmCount" style="text-align: right; margin: 6px 2px 10px; opacity: 0.9; display: block;">登録件数：0件</div>
+
+<div style="margin-top:2px;">
+  <div class="label">検索（部分一致）</div>
+  <input id="qmSearch" placeholder="ユーザー名 / 建物名 / 何でも" type="text" style="width:100%;">
 </div>
-<div style="width:110px;">
-<div class="label">&nbsp;</div>
-<button class="btn-goal" id="btnQmAdd" style="width:100%;">＋追加</button>
+
+<div class="btn-row" style="margin-top:10px; display:flex; gap:10px; justify-content:stretch; flex-wrap:wrap;">
+  <button class="btn-goal" id="btnQmAdd" style="flex:1; width:100%;">＋追加</button>
+  <button class="btn-muted" id="btnQmExport" style="flex:1; width:100%;">エクスポート</button>
+  <button class="btn-muted" id="btnQmImport" style="flex:1; width:100%;">インポート</button>
+  <input accept="application/json" id="qmImportFile" style="display:none;" type="file">
 </div>
-</div>
-<div class="btn-row" style="margin-top:8px;">
-<button class="btn-muted" id="btnQmExport">エクスポート</button>
-<button class="btn-muted" id="btnQmImport">インポート</button>
-<input accept="application/json" id="qmImportFile" style="display:none;" type="file">
-<div class="sub" id="qmCount" style="text-align:center; margin:6px 0 0; display:block;">登録件数：0件</div>
-</div>
+
 <div id="qmResultsWrap" style="display:none; margin-top:10px;">
-<div class="label" id="qmResultsLabel">検索結果</div>
-<div class="list" id="qmList"></div>
+  <div class="label" id="qmResultsLabel">検索結果</div>
+  <div class="list" id="qmList"></div>
 </div>
+
 </div>
 <!-- Quick memo modal -->
 <div aria-hidden="true" class="dcOverlay" id="qmOverlay" style="display:none;">
@@ -1159,11 +1310,9 @@ body::after {
 </div>
 <div class="sub" id="onlineState" style="margin:6px 0 0;text-align:center;display:none;">オンライン中</div>
 </div>
-
-<div class="centerToast" id="centerToast" aria-hidden="true">
-  <div class="centerToastBox" id="centerToastBox">追加しました</div>
+<div aria-hidden="true" class="centerToast" id="centerToast">
+<div class="centerToastBox" id="centerToastBox">追加しました</div>
 </div>
-
 <!-- modal -->
 <div aria-hidden="true" class="modalOverlay" id="modalOverlay">
 <div class="modalToast">
@@ -1174,7 +1323,7 @@ body::after {
 </div>
 <div class="footerBar">
 <div class="footerInner">
-  <div class="footerVer" id="footerVer">v13.8.11</div>
+<div class="footerVer" id="footerVer">v14.0_0</div>
 <button class="btn-muted" id="btnReload" type="button">更新</button>
 </div>
 </div>
@@ -1196,8 +1345,6 @@ body::after {
 </div>
 </div>
 </div>
-
-
 <!-- Quick memo maintenance (hidden) -->
 <div aria-hidden="true" class="dcOverlay" id="qmMaintOverlay" style="display:none;">
 <div class="dcCard" style="max-width:520px;">
@@ -1212,7 +1359,30 @@ body::after {
 (() => {
   "use strict";
 
-  const APP_VERSION = "v13.8.11";
+  const APP_VERSION = "v14.0_0";
+  const $versionTag = document.getElementById("versionTag");
+  const $footerVer = document.getElementById("footerVer");
+  if ($versionTag) $versionTag.textContent = APP_VERSION;
+  if ($footerVer) $footerVer.textContent = APP_VERSION;
+
+  function getTotalSalesValue(){
+    const el = document.getElementById("totalSales");
+    if(!el) return 0;
+    const n = parseInt(String(el.textContent).replace(/[^0-9]/g,''),10);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function applyTotalSalesTier(){
+    const card = document.getElementById("totalSalesCard");
+    if(!card) return;
+    const t = getTotalSalesValue();
+    card.classList.remove("tier1","tier2","tier3","tier4");
+    if (t <= 10000) card.classList.add("tier1");
+    else if (t <= 20000) card.classList.add("tier2");
+    else if (t <= 30000) card.classList.add("tier3");
+    else card.classList.add("tier4");
+  }
+
 
   // 配達完了ポップアップ背景（総売上に応じて差し替え）
   // ※GitHubにアップする画像パスはここだけ変えればOK
@@ -1240,6 +1410,20 @@ body::after {
     if(wage>=3000) card.classList.add("tier-legend");
     else if(wage>=2000) card.classList.add("tier-mid");
   };
+
+  const setTotalSalesTier = (sales) => {
+    const card = document.getElementById("totalSalesCard");
+    if(!card) return;
+    card.classList.remove("tier1","tier2","tier3","tier4");
+    const n = Number(sales);
+    const v = Number.isFinite(n) ? n : 0;
+    if(v<=10000) card.classList.add("tier1");
+    else if(v<=20000) card.classList.add("tier2");
+    else if(v<=30000) card.classList.add("tier3");
+    else card.classList.add("tier4");
+  };
+
+
 
 const safeEl = (id) => {
     const n = document.getElementById(id);
@@ -2288,6 +2472,7 @@ function openMemoEditModal(dayKey){
     if(safeEl("targetAmountLabel")) safeEl("targetAmountLabel").textContent=gAmt>0?`¥${fmtYen(gAmt)}`:"なし";
 
     if(safeEl("totalSales")) safeEl("totalSales").textContent=fmtYen(t.sales);
+    setTotalSalesTier(t.sales);
     if(safeEl("runCount")) safeEl("runCount").textContent=fmtYen(t.count);
 
     const onlineMs=currentOnlineMs();
@@ -3109,6 +3294,6 @@ function init(){
 
 })()
 </script>
-</div></div>  </div>
+</div></div> </div>
 
 </body></html>
