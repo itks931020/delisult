@@ -1191,7 +1191,7 @@ body::after {
 <button class="btn-muted" id="btnToggleRunList">配達済み案件</button>
 <button id="btnAddRun">追加</button>
 </div>
-<div class="runlist" id="runList" style="display: block;"><div class="sub" style="margin:6px 0 0;">まだなし</div></div>
+<div class="runlist" id="runList"></div>
 </div>
 <div class="card sparkle" id="topSummaryCard">
 <div class="row">
@@ -1225,28 +1225,35 @@ body::after {
 <div class="chgBox chgResult" id="chgResult" style="margin-top:8px; display:none;"></div>
 </div>
 <div class="card" id="quickMemoCard">
-<div class="center-title" style="font-size:16px;">メモ（端末内のみ）</div>
-<div class="subtitle" style="text-align:center; margin-top:2px;">※共有・送信なし / ショートカット検索連携OK</div>
+  <div class="center-title" style="font-size:16px;">メモ（端末内のみ）</div>
+  <div class="subtitle" style="text-align:center; margin-top:2px;">※共有・送信なし / ショートカット検索連携OK</div>
 
-<div class="sub" id="qmCount" style="text-align: right; margin: 6px 2px 10px; opacity: 0.9; display: block;">登録件数：0件</div>
+  <!-- 登録件数：上へ移動（右寄せ） -->
+  <div class="sub" id="qmCount" style="text-align:right; margin:8px 2px 0; display:block;">登録件数：0件</div>
 
-<div style="margin-top:2px;">
-  <div class="label">検索（部分一致）</div>
-  <input id="qmSearch" placeholder="ユーザー名 / 建物名 / 何でも" type="text" style="width:100%;">
-</div>
+  <!-- 検索 + 追加（横幅いっぱい） -->
+  <div class="row" style="margin-top:8px; gap:10px; flex-wrap:wrap;">
+    <div style="flex:1; min-width:220px;">
+      <div class="label">検索（部分一致）</div>
+      <input id="qmSearch" placeholder="ユーザー名 / 建物名 / 何でも" type="text">
+    </div>
+    <div style="flex:0 0 160px; min-width:140px;">
+      <div class="label">&nbsp;</div>
+      <button class="btn-goal" id="btnQmAdd" style="width:100%;">＋追加</button>
+    </div>
+  </div>
 
-<div class="btn-row" style="margin-top:10px; display:flex; gap:10px; justify-content:stretch; flex-wrap:wrap;">
-  <button class="btn-goal" id="btnQmAdd" style="flex:1; width:100%;">＋追加</button>
-  <button class="btn-muted" id="btnQmExport" style="flex:1; width:100%;">エクスポート</button>
-  <button class="btn-muted" id="btnQmImport" style="flex:1; width:100%;">インポート</button>
-  <input accept="application/json" id="qmImportFile" style="display:none;" type="file">
-</div>
+  <!-- エクスポート/インポート（横幅いっぱい） -->
+  <div class="btn-row" style="margin-top:10px; display:flex; gap:10px; width:100%; flex-wrap:wrap;">
+    <button class="btn-muted" id="btnQmExport" style="flex:1; min-width:160px;">エクスポート</button>
+    <button class="btn-muted" id="btnQmImport" style="flex:1; min-width:160px;">インポート</button>
+    <input accept="application/json" id="qmImportFile" style="display:none;" type="file">
+  </div>
 
-<div id="qmResultsWrap" style="display:none; margin-top:10px;">
-  <div class="label" id="qmResultsLabel">検索結果</div>
-  <div class="list" id="qmList"></div>
-</div>
-
+  <div id="qmResultsWrap" style="display:none; margin-top:10px;">
+    <div class="label" id="qmResultsLabel">検索結果</div>
+    <div class="list" id="qmList"></div>
+  </div>
 </div>
 <!-- Quick memo modal -->
 <div aria-hidden="true" class="dcOverlay" id="qmOverlay" style="display:none;">
