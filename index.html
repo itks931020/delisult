@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <meta name="format-detection" content="telephone=no">
-<title>デリザルト | Delivery Result Tracker v13.8.0</title>
+<title>デリザルト | Delivery Result Tracker v13.8.6</title>
 <style>
 :root{
   --forest-bg: none;
@@ -707,6 +707,116 @@ body::after {
   font-weight: 900 !important;
   text-shadow: 0 10px 22px rgba(0,0,0,.65) !important;
 }
+
+
+/* =========================================================
+   DC POPUP THEME 03: Bright Forest Reward (green + gold)
+   Background image: ./assets/img/dc_forest_reward_bg.PNG
+   Target: delivery complete popup only (#dcOverlay)
+   ========================================================= */
+:root{
+  --dc-forest-bg: url("./assets/img/dc_forest_reward_bg.PNG");
+}
+
+#dcOverlay{
+  background: rgba(5, 15, 10, .35) !important;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+#dcOverlay .dcToast{
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+
+  /* image as "air", CSS as main (Safari-safe & no-crop) */
+  background-image:
+    linear-gradient(180deg, rgba(30, 90, 50, .65), rgba(10, 40, 25, .75)),
+    var(--dc-forest-bg) !important;
+  background-size: cover, cover;
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, center 45%;
+
+  border: 1px solid rgba(180, 220, 120, .62) !important;
+
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.75),
+    0 0 0 1px rgba(255,255,255,.08) inset !important;
+
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+}
+
+/* soft particles (static) */
+#dcOverlay .dcToast::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(180,255,120,.25) 0 2px, transparent 4px),
+    radial-gradient(circle at 70% 40%, rgba(255,220,120,.22) 0 2px, transparent 5px),
+    radial-gradient(circle at 40% 70%, rgba(180,255,120,.18) 0 2px, transparent 6px);
+  opacity:.95;
+}
+
+/* reward glow from bottom */
+#dcOverlay .dcToast::after{
+  content:"";
+  position:absolute;
+  left:-10%;
+  right:-10%;
+  bottom:-45%;
+  height:80%;
+  pointer-events:none;
+  background: radial-gradient(
+    closest-side,
+    rgba(255,220,120,.35),
+    rgba(180,255,120,.18),
+    transparent 70%
+  );
+  filter: blur(12px);
+}
+
+/* keep text above overlays */
+#dcOverlay .dcToast > *{
+  position: relative;
+  z-index: 1;
+}
+
+#dcOverlay .dcTitle{
+  color: #f6ffda;
+  letter-spacing: .04em;
+  text-shadow:
+    0 8px 24px rgba(0,0,0,.7),
+    0 0 18px rgba(180,255,120,.4);
+}
+
+#dcOverlay .dcBig{
+  color: #fff;
+  text-shadow: 0 8px 20px rgba(0,0,0,.6);
+}
+
+/* Today total line (gold accent) */
+#dcOverlay .dcLine span:last-child,
+#dcOverlay .dcNowLine span{
+  text-shadow: 0 0 14px rgba(255,220,120,.20);
+}
+
+#dcOverlay .dcLine:first-child span:last-child{
+  color: #ffe9a8;
+  text-shadow: 0 0 14px rgba(255,220,120,.45);
+}
+
+/* subtle, clean entrance */
+#dcOverlay.show .dcToast{
+  animation: dcFadeUp .32s ease-out;
+}
+@keyframes dcFadeUp{
+  from{ transform: translateY(12px); opacity: 0; }
+  to{ transform: translateY(0); opacity: 1; }
+}
+
 </style>
 <meta content="noindex,nofollow" name="robots">
 <script>
@@ -1064,14 +1174,14 @@ body::after {
 </div>
 <div class="footerBar">
 <div class="footerInner">
-<div class="footerVer" id="footerVer">v13.8.0</div>
+<div class="footerVer" id="footerVer">v13.8.6</div>
 <button class="btn-muted" id="btnReload" type="button">更新</button>
 </div>
 </div>
 <!-- delivery complete popup -->
 <div aria-hidden="true" class="dcOverlay" id="dcOverlay">
 <div class="dcToast">
-<div class="dcTitle" id="dcTitle">✨💰配達完了💰✨</div>
+<div class="dcTitle" id="dcTitle">配達完了</div>
 <div class="dcBig">
 <div class="dcNowLine">今回の売上：<span id="dcNowSales">¥0</span></div>
 <div class="dcNowLine">配達時間：<span id="dcNowMinutes">0分</span></div>
@@ -1102,7 +1212,7 @@ body::after {
 (() => {
   "use strict";
 
-  const APP_VERSION = "v13.8.0";
+  const APP_VERSION = "v13.8.6";
   const STORE_KEY = "ddt_store_v12";
 
   const setOnlineWageTier = (wage) => {
