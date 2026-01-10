@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <meta content="telephone=no" name="format-detection">
-<title>デリザルト v14.0_2</title>
+<title>デリザルト v14.0_6</title>
 <style>
 :root{
   --forest-bg: none;
@@ -898,7 +898,7 @@ body::after {
 <body>
 <div id="bg"></div>
 <div id="scroll">
-<div class="appTitle"><div class="jp">デリザルト v14.0_2</div><div class="en">Delivery Result Tracker</div></div>
+<div class="appTitle"><div class="jp">デリザルト v14.0_6</div><div class="en">Delivery Result Tracker</div></div>
 <div class="card sparkle" id="mainStatsCard">
 <div class="top-row tier1" id="totalSalesCard">
 <div class="label">総売上（クエスト込み）</div>
@@ -1188,8 +1188,7 @@ body::after {
 <button class="btn-cash" id="btnAddCashTip">現金チップ</button>
 </div>
 <div class="btn-row">
-<button class="btn-danger" id="btnResetQuestToday">クエスト今日分リセット</button>
-<button class="btn-danger" id="btnResetAll">全てリセット</button>
+<button class="btn-danger" id="btnResetMenu" style="flex:1;width:100%">リセット</button>
 </div>
 </div><div class="card" id="calendarCard">
 <div class="center-title" id="calendarTitle" style="font-size:16px;cursor:pointer;">売上カレンダー</div>
@@ -1219,6 +1218,25 @@ body::after {
 </div>
 </div>
 </div>
+<!-- delivery complete popup -->
+<div aria-hidden="true" class="dcOverlay" id="dcOverlay">
+  <div class="dcToast">
+    <div class="dcTitle" id="dcTitle">配達完了</div>
+    <div class="dcBig">
+      <div class="dcNowLine">今回の売上：<span id="dcNowSales">¥0</span></div>
+      <div class="dcNowLine">配達時間：<span id="dcNowMinutes">0分</span></div>
+      <div class="dcNowLine">時給換算：<span id="dcNowWage">¥0/h</span></div>
+    </div>
+    <div class="dcSpacer"></div>
+    <div class="dcGrid" id="dcGrid">
+      <div class="dcLine"><span>総売上</span><span id="dcSales">¥0</span></div>
+      <div class="dcLine"><span>総配達件数</span><span id="dcRuns">0回</span></div>
+      <div class="dcLine"><span>総オンライン時給換算</span><span id="dcOnlineWage">¥0/h</span></div>
+      <div class="dcLine"><span>総現金代引き</span><span id="dcCash">¥0</span></div>
+    </div>
+  </div>
+</div>
+
 <!-- Quick memo maintenance (hidden) -->
 <div aria-hidden="true" class="dcOverlay" id="qmMaintOverlay" style="display:none;">
 <div class="dcCard" style="max-width:520px;">
@@ -1233,7 +1251,7 @@ body::after {
 (() => {
   "use strict";
 
-  const APP_VERSION = "v14.0_2";
+  const APP_VERSION = "v14.0_6";
 
   function getTotalSalesValue(){
     const el = document.getElementById("totalSales");
@@ -1489,6 +1507,9 @@ function closeDeliveryCompletePopup(){
     ttl.textContent = title;
     mm.textContent = msg;
     acts.innerHTML = "";
+    // stack buttons vertically when there are many options
+    acts.style.flexDirection = (buttons.length > 2) ? "column" : "row";
+    acts.style.alignItems = "stretch";
     buttons.forEach((b)=>{
       const btn=document.createElement("button");
       btn.textContent=b.text||"OK";
@@ -2448,7 +2469,9 @@ function openMemoEditModal(dayKey){
 
     safeEl("btnAddQuest")?.addEventListener("click", addQuest);
     safeEl("btnAddCashTip")?.addEventListener("click", addCashTip);
-    safeEl("btnResetQuestToday")?.addEventListener("click", ()=>{
+
+    // ===== Reset menu (Quest / Today Sales / All) =====
+    function confirmResetQuestToday(){
       showModal({
         title:"確認",
         msg:"今日のクエストをリセットする？（過去日は消えない）",
@@ -2457,10 +2480,20 @@ function openMemoEditModal(dayKey){
           {text:"リセット", type:"danger", onClick:()=>resetQuestToday()}
         ]
       });
-    });
+    }
 
+    function confirmResetTodaySales(){
+      showModal({
+        title:"確認",
+        msg:"今日入力した売上をリセットする？（今日の配達ログと現金チップのみ消える）",
+        buttons:[
+          {text:"やめる", type:"muted", onClick:()=>{}},
+          {text:"リセット", type:"danger", onClick:()=>resetTodaySales()}
+        ]
+      });
+    }
 
-    safeEl("btnResetAll")?.addEventListener("click", ()=>{
+    function confirmAllReset(){
       showModal({
         title:"確認",
         msg:"全ての入力をリセットする？（配達ログ・クエスト・目標・メモ・オンライン時間など全部消える）",
@@ -2472,7 +2505,38 @@ function openMemoEditModal(dayKey){
           }}
         ]
       });
-    });    safeEl("btnGoalSet")?.addEventListener("click", setGoal);
+    }
+
+    function openResetMenu(){
+      showModal({
+        title:"リセット",
+        msg:"実行するリセットを選んでください",
+        buttons:[
+          {text:"クエストリセット", type:"danger", onClick:()=>confirmResetQuestToday()},
+          {text:"今日の売上リセット", type:"danger", onClick:()=>confirmResetTodaySales()},
+          {text:"全てリセット", type:"danger", onClick:()=>confirmAllReset()},
+          {text:"閉じる", type:"muted", onClick:()=>{}}
+        ]
+      });
+    }
+
+    safeEl("btnResetMenu")?.addEventListener("click", openResetMenu);
+
+
+    
+    function resetTodaySales(){
+      markDirty();
+      const dk = todayKey();
+      // runs
+      state.runsLog = (state.runsLog||[]).filter(r => businessDayKey(r.ts||0) !== dk);
+      // cash tips
+      state.cashTip = (state.cashTip||[]).filter(x => businessDayKey(x.ts||0) !== dk);
+      // NOTE: クエストは専用ボタンがあるためここでは触らない（意図的）
+      updateUI();
+      showToast("今日の売上をリセットした");
+    }
+
+    safeEl("btnGoalSet")?.addEventListener("click", setGoal);
     safeEl("btnGoalReset")?.addEventListener("click", ()=>{
       showModal({
         title:"確認",
